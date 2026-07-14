@@ -121,6 +121,51 @@ export default function Dock({
   const isHovered = useMotionValue(0);
 
   const [activeSection, setActiveSection] = useState("");
+  const [windowWidth, setWindowWidth] = useState(typeof window !== "undefined" ? window.innerWidth : 1200);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setWindowWidth(window.innerWidth);
+    };
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  const { currentBaseItemSize, currentPanelHeight, currentMagnification, currentGap, currentPadding } = useMemo(() => {
+    if (windowWidth < 280) {
+      return {
+        currentBaseItemSize: 24,
+        currentPanelHeight: 36,
+        currentMagnification: 30,
+        currentGap: "gap-1.5",
+        currentPadding: "px-2 pb-1.5"
+      };
+    } else if (windowWidth < 350) {
+      return {
+        currentBaseItemSize: 32,
+        currentPanelHeight: 46,
+        currentMagnification: 38,
+        currentGap: "gap-2",
+        currentPadding: "px-2.5 pb-2"
+      };
+    } else if (windowWidth < 420) {
+      return {
+        currentBaseItemSize: 38,
+        currentPanelHeight: 52,
+        currentMagnification: 46,
+        currentGap: "gap-2.5",
+        currentPadding: "px-3.5 pb-2"
+      };
+    } else {
+      return {
+        currentBaseItemSize: baseItemSize,
+        currentPanelHeight: panelHeight,
+        currentMagnification: magnification,
+        currentGap: "gap-4",
+        currentPadding: "px-4 pb-2"
+      };
+    }
+  }, [windowWidth, baseItemSize, panelHeight, magnification]);
 
   const handleScroll = (id) => {
     setActiveSection(id);
@@ -178,10 +223,10 @@ export default function Dock({
   ], []);
 
   const maxHeight = useMemo(
-    () => Math.max(dockHeight, magnification + magnification / 2 + 4),
-    [magnification, dockHeight]
+    () => Math.max(dockHeight, currentMagnification + currentMagnification / 2 + 4),
+    [currentMagnification, dockHeight]
   );
-  const heightRow = useTransform(isHovered, [0, 1], [panelHeight, maxHeight]);
+  const heightRow = useTransform(isHovered, [0, 1], [currentPanelHeight, maxHeight]);
   const height = useSpring(heightRow, spring);
 
   return (
@@ -199,8 +244,8 @@ export default function Dock({
             isHovered.set(0);
             mouseX.set(Infinity);
           }}
-          className={`${className} flex items-end justify-center w-fit gap-4 rounded-2xl border-neutral-700/40 border bg-[#120F17]/60 backdrop-blur-md pb-2 px-4 shadow-2xl`}
-          style={{ height: panelHeight }}
+          className={`${className} flex items-end justify-center w-fit ${currentGap} rounded-2xl border-neutral-700/40 border bg-[#120F17]/60 backdrop-blur-md ${currentPadding} shadow-2xl`}
+          style={{ height: currentPanelHeight }}
           role="toolbar"
           aria-label="Application dock"
         >
@@ -216,8 +261,8 @@ export default function Dock({
                 mouseX={mouseX}
                 spring={spring}
                 distance={distance}
-                magnification={magnification}
-                baseItemSize={baseItemSize}
+                magnification={currentMagnification}
+                baseItemSize={currentBaseItemSize}
                 label={item.label}
               >
                 <DockIcon>{item.icon}</DockIcon>

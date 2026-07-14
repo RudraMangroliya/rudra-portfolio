@@ -35,14 +35,14 @@ const Navbar = () => {
         <div className="w-full flex justify-between items-center max-w-7xl mx-auto">
           <Link
             to="/"
-            className="flex items-center gap-3"
+            className="flex items-center gap-2 xs:gap-3"
             onClick={() => {
               window.scrollTo({ top: 0, behavior: "smooth" });
             }}
           >
-            <img src={me} alt="logo" className="w-12 h-12 rounded-full border-2 border-violet-500/70 shadow-lg object-cover" />
-            <p className="text-white text-[20px] font-bold cursor-pointer flex items-center">
-              Rudra Mangroliya &nbsp;
+            <img src={me} alt="logo" className="w-8 h-8 xs:w-10 xs:h-10 sm:w-12 sm:h-12 rounded-full border-2 border-violet-500/70 shadow-lg object-cover" />
+            <p className="text-white text-xs xs:text-base sm:text-[20px] font-bold cursor-pointer flex items-center">
+              Rudra<span className="hidden min-[340px]:inline">&nbsp;Mangroliya</span> &nbsp;
               <span className="sm:block hidden text-violet-400 font-medium text-[16px] ml-1">| Software Engineer</span>
             </p>
           </Link>
