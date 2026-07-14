@@ -122,13 +122,13 @@ const ComputersCanvas = () => {
 
   const { scale, position } = useMemo(() => {
     if (windowWidth < 280) {
-      return { scale: 0.24, position: [-0.1, -1.2, -2.2] };
+      return { scale: 0.20, position: [0, -1.2, -2.2] };
     } else if (windowWidth < 360) {
-      return { scale: 0.32, position: [-0.15, -1.5, -2.2] };
+      return { scale: 0.28, position: [0, -1.5, -2.2] };
     } else if (windowWidth < 500) {
-      return { scale: 0.40, position: [-0.2, -1.8, -2.2] };
+      return { scale: 0.38, position: [0, -1.9, -2.2] };
     } else if (windowWidth < 800) {
-      return { scale: 0.55, position: [-0.25, -2.4, -2.2] };
+      return { scale: 0.50, position: [0, -2.4, -2.2] };
     } else {
       return { scale: 0.75, position: [0, -3.25, -1.5] };
     }
