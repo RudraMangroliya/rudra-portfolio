@@ -4,7 +4,7 @@ import { OrbitControls, Preload, useGLTF } from "@react-three/drei";
 
 import CanvasLoader from "../Loader";
 
-const Computers = ({ scale, position }) => {
+const Computers = ({ scale, position, setControlsEnabled }) => {
   const computer = useGLTF("./desktop_pc/scene.gltf");
 
   return (
@@ -24,6 +24,19 @@ const Computers = ({ scale, position }) => {
         scale={scale}
         position={position}
         rotation={[-0.01, -0.2, -0.1]}
+        onPointerDown={(e) => {
+          e.stopPropagation();
+          setControlsEnabled(true);
+          document.body.style.cursor = "grabbing";
+        }}
+        onPointerOver={(e) => {
+          e.stopPropagation();
+          document.body.style.cursor = "grab";
+        }}
+        onPointerOut={(e) => {
+          e.stopPropagation();
+          document.body.style.cursor = "auto";
+        }}
       />
     </mesh>
   );
@@ -34,12 +47,19 @@ const ComputersCanvas = () => {
   const [isInView, setIsInView] = useState(false);
   const [isTabVisible, setIsTabVisible] = useState(true);
   const [windowWidth, setWindowWidth] = useState(typeof window !== "undefined" ? window.innerWidth : 1200);
+  const [controlsEnabled, setControlsEnabled] = useState(false);
 
   useEffect(() => {
     const handleResize = () => {
       setWindowWidth(window.innerWidth);
     };
     window.addEventListener("resize", handleResize);
+
+    const handlePointerUp = () => {
+      setControlsEnabled(false);
+      document.body.style.cursor = "auto";
+    };
+    window.addEventListener("pointerup", handlePointerUp);
 
     // Setup intersection observer
     const observer = new IntersectionObserver(
@@ -62,6 +82,7 @@ const ComputersCanvas = () => {
     // Remove listeners when the component is unmounted
     return () => {
       window.removeEventListener("resize", handleResize);
+      window.removeEventListener("pointerup", handlePointerUp);
       if (containerRef.current) {
         observer.unobserve(containerRef.current);
       }
@@ -98,8 +119,9 @@ const ComputersCanvas = () => {
               enableZoom={false}
               maxPolarAngle={Math.PI / 2}
               minPolarAngle={Math.PI / 2}
+              enabled={controlsEnabled}
             />
-            <Computers scale={scale} position={position} />
+            <Computers scale={scale} position={position} setControlsEnabled={setControlsEnabled} />
           </Suspense>
 
           <Preload all />
