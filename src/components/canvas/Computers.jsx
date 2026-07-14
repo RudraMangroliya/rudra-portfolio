@@ -121,14 +121,8 @@ const ComputersCanvas = () => {
   }, []);
 
   const { scale, position } = useMemo(() => {
-    if (windowWidth < 280) {
-      return { scale: 0.20, position: [0, -1.2, -2.2] };
-    } else if (windowWidth < 360) {
-      return { scale: 0.28, position: [0, -1.5, -2.2] };
-    } else if (windowWidth < 500) {
-      return { scale: 0.38, position: [0, -1.9, -2.2] };
-    } else if (windowWidth < 800) {
-      return { scale: 0.50, position: [0, -2.4, -2.2] };
+    if (windowWidth < 500) {
+      return { scale: 0.7, position: [0, -3, -1.5] };
     } else {
       return { scale: 0.75, position: [0, -3.25, -1.5] };
     }
@@ -141,7 +135,7 @@ const ComputersCanvas = () => {
           frameloop="demand"
           shadows
           dpr={[1, 1.5]}
-          camera={{ position: [20, 3, 5], fov: 25 }}
+          camera={{ position: [20, 3, 5], fov: windowWidth < 500 ? 46 : 25 }}
           gl={{ preserveDrawingBuffer: false, powerPreference: "high-performance" }}
         >
           <Suspense fallback={<CanvasLoader />}>
