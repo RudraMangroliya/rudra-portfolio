@@ -24,9 +24,9 @@ const Earth = ({ orbitControlsRef }) => {
       // 3. Update OrbitControls synchronously via its ref
       if (orbitControlsRef.current) {
         if (intersects.length === 0) {
-          orbitControlsRef.current.enabled = false;
+          orbitControlsRef.current.enableRotate = false;
         } else {
-          orbitControlsRef.current.enabled = true;
+          orbitControlsRef.current.enableRotate = true;
           document.body.style.cursor = "grabbing";
         }
       }
@@ -34,7 +34,7 @@ const Earth = ({ orbitControlsRef }) => {
 
     const handlePointerUp = () => {
       if (orbitControlsRef.current) {
-        orbitControlsRef.current.enabled = false;
+        orbitControlsRef.current.enableRotate = false;
       }
       document.body.style.cursor = "auto";
     };
@@ -123,7 +123,7 @@ const EarthCanvas = () => {
               enableZoom={false}
               maxPolarAngle={Math.PI / 2}
               minPolarAngle={Math.PI / 2}
-              enabled={false}
+              enableRotate={false}
             />
             <Earth orbitControlsRef={orbitControlsRef} />
 
