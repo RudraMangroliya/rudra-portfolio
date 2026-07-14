@@ -4,7 +4,7 @@ import { OrbitControls, Preload, useGLTF } from "@react-three/drei";
 
 import CanvasLoader from "../Loader";
 
-const Computers = ({ scale, position, setControlsEnabled }) => {
+const Computers = ({ scale, position, orbitControlsRef }) => {
   const computer = useGLTF("./desktop_pc/scene.gltf");
   const { camera, raycaster, scene, gl } = useThree();
 
@@ -21,21 +21,33 @@ const Computers = ({ scale, position, setControlsEnabled }) => {
       raycaster.setFromCamera({ x, y }, camera);
       const intersects = raycaster.intersectObjects(scene.children, true);
 
-      // 3. If there are no intersections with mesh, disable controls
-      if (intersects.length === 0) {
-        setControlsEnabled(false);
-      } else {
-        setControlsEnabled(true);
+      // 3. Update OrbitControls synchronously via its ref
+      if (orbitControlsRef.current) {
+        if (intersects.length === 0) {
+          orbitControlsRef.current.enabled = false;
+        } else {
+          orbitControlsRef.current.enabled = true;
+          document.body.style.cursor = "grabbing";
+        }
       }
+    };
+
+    const handlePointerUp = () => {
+      if (orbitControlsRef.current) {
+        orbitControlsRef.current.enabled = false;
+      }
+      document.body.style.cursor = "auto";
     };
 
     // Use capture phase so we evaluate intersection before OrbitControls processes pointerdown
     canvasEl.addEventListener("pointerdown", handleNativePointerDown, true);
+    window.addEventListener("pointerup", handlePointerUp);
 
     return () => {
       canvasEl.removeEventListener("pointerdown", handleNativePointerDown, true);
+      window.removeEventListener("pointerup", handlePointerUp);
     };
-  }, [gl, camera, raycaster, scene, setControlsEnabled]);
+  }, [gl, camera, raycaster, scene, orbitControlsRef]);
 
   return (
     <mesh>
@@ -54,11 +66,6 @@ const Computers = ({ scale, position, setControlsEnabled }) => {
         scale={scale}
         position={position}
         rotation={[-0.01, -0.2, -0.1]}
-        onPointerDown={(e) => {
-          e.stopPropagation();
-          setControlsEnabled(true);
-          document.body.style.cursor = "grabbing";
-        }}
         onPointerOver={(e) => {
           e.stopPropagation();
           document.body.style.cursor = "grab";
@@ -77,19 +84,13 @@ const ComputersCanvas = () => {
   const [isInView, setIsInView] = useState(false);
   const [isTabVisible, setIsTabVisible] = useState(true);
   const [windowWidth, setWindowWidth] = useState(typeof window !== "undefined" ? window.innerWidth : 1200);
-  const [controlsEnabled, setControlsEnabled] = useState(false);
+  const orbitControlsRef = useRef(null);
 
   useEffect(() => {
     const handleResize = () => {
       setWindowWidth(window.innerWidth);
     };
     window.addEventListener("resize", handleResize);
-
-    const handlePointerUp = () => {
-      setControlsEnabled(false);
-      document.body.style.cursor = "auto";
-    };
-    window.addEventListener("pointerup", handlePointerUp);
 
     // Setup intersection observer
     const observer = new IntersectionObserver(
@@ -112,7 +113,6 @@ const ComputersCanvas = () => {
     // Remove listeners when the component is unmounted
     return () => {
       window.removeEventListener("resize", handleResize);
-      window.removeEventListener("pointerup", handlePointerUp);
       if (containerRef.current) {
         observer.unobserve(containerRef.current);
       }
@@ -146,12 +146,13 @@ const ComputersCanvas = () => {
         >
           <Suspense fallback={<CanvasLoader />}>
             <OrbitControls
+              ref={orbitControlsRef}
               enableZoom={false}
               maxPolarAngle={Math.PI / 2}
               minPolarAngle={Math.PI / 2}
-              enabled={controlsEnabled}
+              enabled={false}
             />
-            <Computers scale={scale} position={position} setControlsEnabled={setControlsEnabled} />
+            <Computers scale={scale} position={position} orbitControlsRef={orbitControlsRef} />
           </Suspense>
 
           <Preload all />
