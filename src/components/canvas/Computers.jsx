@@ -1,11 +1,41 @@
 import { Suspense, useEffect, useState, useRef, useMemo } from "react";
-import { Canvas } from "@react-three/fiber";
+import { Canvas, useThree } from "@react-three/fiber";
 import { OrbitControls, Preload, useGLTF } from "@react-three/drei";
 
 import CanvasLoader from "../Loader";
 
 const Computers = ({ scale, position, setControlsEnabled }) => {
   const computer = useGLTF("./desktop_pc/scene.gltf");
+  const { camera, raycaster, scene, gl } = useThree();
+
+  useEffect(() => {
+    const canvasEl = gl.domElement;
+
+    const handleNativePointerDown = (event) => {
+      // 1. Get click position normalized relative to canvas size
+      const rect = canvasEl.getBoundingClientRect();
+      const x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+      const y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+
+      // 2. Raycast from camera to check model intersection
+      raycaster.setFromCamera({ x, y }, camera);
+      const intersects = raycaster.intersectObjects(scene.children, true);
+
+      // 3. If there are no intersections with mesh, disable controls
+      if (intersects.length === 0) {
+        setControlsEnabled(false);
+      } else {
+        setControlsEnabled(true);
+      }
+    };
+
+    // Use capture phase so we evaluate intersection before OrbitControls processes pointerdown
+    canvasEl.addEventListener("pointerdown", handleNativePointerDown, true);
+
+    return () => {
+      canvasEl.removeEventListener("pointerdown", handleNativePointerDown, true);
+    };
+  }, [gl, camera, raycaster, scene, setControlsEnabled]);
 
   return (
     <mesh>
