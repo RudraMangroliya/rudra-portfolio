@@ -120,17 +120,27 @@ const ComputersCanvas = () => {
     };
   }, []);
 
-  const { scale, position } = useMemo(() => {
+  const { scale, position, target } = useMemo(() => {
     if (windowWidth < 280) {
-      return { scale: 0.23, position: [0, -1.1, -2.2] };
+      const s = 0.23;
+      const pos = [0, -1.1, -2.2];
+      return { scale: s, position: pos, target: [pos[0], pos[1] + (s * 4.33), pos[2] + (s * 2.0)] };
     } else if (windowWidth < 380) {
-      return { scale: 0.32, position: [0, -1.5, -2.2] };
+      const s = 0.32;
+      const pos = [0, -1.5, -2.2];
+      return { scale: s, position: pos, target: [pos[0], pos[1] + (s * 4.33), pos[2] + (s * 2.0)] };
     } else if (windowWidth < 500) {
-      return { scale: 0.40, position: [0, -1.8, -2.2] };
+      const s = 0.40;
+      const pos = [0, -1.8, -2.2];
+      return { scale: s, position: pos, target: [pos[0], pos[1] + (s * 4.33), pos[2] + (s * 2.0)] };
     } else if (windowWidth < 800) {
-      return { scale: 0.55, position: [0, -2.4, -2.2] };
+      const s = 0.55;
+      const pos = [0, -2.4, -2.2];
+      return { scale: s, position: pos, target: [pos[0], pos[1] + (s * 4.33), pos[2] + (s * 2.0)] };
     } else {
-      return { scale: 0.75, position: [0, -3.25, -1.5] };
+      const s = 0.75;
+      const pos = [0, -3.25, -1.5];
+      return { scale: s, position: pos, target: [pos[0], pos[1] + (s * 4.33), pos[2] + (s * 2.0)] };
     }
   }, [windowWidth]);
 
@@ -143,7 +153,7 @@ const ComputersCanvas = () => {
           dpr={[1, 1.5]}
           camera={{ position: [20, 3, 5], fov: 25 }}
           gl={{ preserveDrawingBuffer: false, powerPreference: "high-performance" }}
-        >ī
+        >
           <Suspense fallback={<CanvasLoader />}>
             <OrbitControls
               ref={orbitControlsRef}
@@ -151,6 +161,7 @@ const ComputersCanvas = () => {
               maxPolarAngle={Math.PI / 2}
               minPolarAngle={Math.PI / 2}
               enabled={false}
+              target={target}
             />
             <Computers scale={scale} position={position} orbitControlsRef={orbitControlsRef} />
           </Suspense>
