@@ -136,7 +136,7 @@ export default function Dock({
 
   // Set active section based on scroll position
   useEffect(() => {
-    const sections = ["", "about", "work", "contact"];
+    const sections = ["", "about", "work", "tech", "projects", "certifications", "contact"];
     const handleScrollSpy = () => {
       const scrollPos = window.scrollY + window.innerHeight / 3;
       let currentSection = "";
@@ -146,8 +146,10 @@ export default function Dock({
         const el = document.getElementById(section);
         if (el) {
           const parent = el.parentElement;
-          const top = parent ? parent.offsetTop : el.offsetTop;
-          const height = parent ? parent.offsetHeight : el.offsetHeight;
+          const target = parent || el;
+          const rect = target.getBoundingClientRect();
+          const top = rect.top + window.scrollY;
+          const height = rect.height;
           if (scrollPos >= top && scrollPos < top + height) {
             currentSection = section;
             break;
@@ -203,7 +205,9 @@ export default function Dock({
           aria-label="Application dock"
         >
           {items.map((item, index) => {
-            const isActive = activeSection === item.sectionId;
+            const isActive = item.sectionId === "work"
+              ? ["work", "tech", "projects", "certifications"].includes(activeSection)
+              : activeSection === item.sectionId;
             return (
               <DockItem
                 key={index}

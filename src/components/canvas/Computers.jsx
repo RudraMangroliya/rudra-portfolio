@@ -1,6 +1,6 @@
 /* eslint-disable react/prop-types */
 /* eslint-disable react/no-unknown-property */
-import { Suspense, useEffect, useState } from "react";
+import { Suspense, useEffect, useState, useRef } from "react";
 import { Canvas } from "@react-three/fiber";
 import { OrbitControls, Preload, useGLTF } from "@react-three/drei";
 
@@ -33,6 +33,9 @@ const Computers = ({ isMobile }) => {
 
 const ComputersCanvas = () => {
   const [isMobile, setIsMobile] = useState(false);
+  const containerRef = useRef(null);
+  const [isInView, setIsInView] = useState(false);
+  const [isTabVisible, setIsTabVisible] = useState(true);
 
   useEffect(() => {
     // Add a listener for changes to the screen size
@@ -49,31 +52,61 @@ const ComputersCanvas = () => {
     // Add the callback function as a listener for changes to the media query
     mediaQuery.addEventListener("change", handleMediaQueryChange);
 
-    // Remove the listener when the component is unmounted
+    // Setup intersection observer
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setIsInView(entry.isIntersecting);
+      },
+      { rootMargin: "200px" }
+    );
+
+    if (containerRef.current) {
+      observer.observe(containerRef.current);
+    }
+
+    // Setup visibility change listener
+    const handleVisibility = () => {
+      setIsTabVisible(document.visibilityState === "visible");
+    };
+    document.addEventListener("visibilitychange", handleVisibility);
+
+    // Remove listeners when the component is unmounted
     return () => {
       mediaQuery.removeEventListener("change", handleMediaQueryChange);
+      if (containerRef.current) {
+        observer.unobserve(containerRef.current);
+      }
+      document.removeEventListener("visibilitychange", handleVisibility);
     };
   }, []);
 
   return (
-    <Canvas
-      frameloop="demand"
-      shadows
-      dpr={[1, 2]}
-      camera={{ position: [20, 3, 5], fov: 25 }}
-      gl={{ preserveDrawingBuffer: true }}
-    >
-      <Suspense fallback={<CanvasLoader />}>
-        <OrbitControls
-          enableZoom={false}
-          maxPolarAngle={Math.PI / 2}
-          minPolarAngle={Math.PI / 2}
-        />
-        <Computers isMobile={isMobile} />
-      </Suspense>
+    <div ref={containerRef} className="w-full h-full min-h-[350px] sm:min-h-[500px]">
+      {isInView && isTabVisible ? (
+        <Canvas
+          frameloop="demand"
+          shadows
+          dpr={[1, 1.5]}
+          camera={{ position: [20, 3, 5], fov: 25 }}
+          gl={{ preserveDrawingBuffer: false, powerPreference: "high-performance" }}
+        >
+          <Suspense fallback={<CanvasLoader />}>
+            <OrbitControls
+              enableZoom={false}
+              maxPolarAngle={Math.PI / 2}
+              minPolarAngle={Math.PI / 2}
+            />
+            <Computers isMobile={isMobile} />
+          </Suspense>
 
-      <Preload all />
-    </Canvas>
+          <Preload all />
+        </Canvas>
+      ) : (
+        <div className="w-full h-full flex items-center justify-center text-secondary">
+          {/* Static placeholder to maintain layout and prevent lag */}
+        </div>
+      )}
+    </div>
   );
 };
 
