@@ -1,12 +1,10 @@
-/* eslint-disable react/prop-types */
-/* eslint-disable react/no-unknown-property */
-import { Suspense, useEffect, useState, useRef } from "react";
+import { Suspense, useEffect, useState, useRef, useMemo } from "react";
 import { Canvas } from "@react-three/fiber";
 import { OrbitControls, Preload, useGLTF } from "@react-three/drei";
 
 import CanvasLoader from "../Loader";
 
-const Computers = ({ isMobile }) => {
+const Computers = ({ scale, position }) => {
   const computer = useGLTF("./desktop_pc/scene.gltf");
 
   return (
@@ -23,8 +21,8 @@ const Computers = ({ isMobile }) => {
       <pointLight intensity={1} />
       <primitive
         object={computer.scene}
-        scale={isMobile ? 0.7 : 0.75}
-        position={isMobile ? [0, -3, -2.2] : [0, -3.25, -1.5]}
+        scale={scale}
+        position={position}
         rotation={[-0.01, -0.2, -0.1]}
       />
     </mesh>
@@ -32,25 +30,16 @@ const Computers = ({ isMobile }) => {
 };
 
 const ComputersCanvas = () => {
-  const [isMobile, setIsMobile] = useState(false);
   const containerRef = useRef(null);
   const [isInView, setIsInView] = useState(false);
   const [isTabVisible, setIsTabVisible] = useState(true);
+  const [windowWidth, setWindowWidth] = useState(typeof window !== "undefined" ? window.innerWidth : 1200);
 
   useEffect(() => {
-    // Add a listener for changes to the screen size
-    const mediaQuery = window.matchMedia("(max-width: 500px)");
-
-    // Set the initial value of the `isMobile` state variable
-    setIsMobile(mediaQuery.matches);
-
-    // Define a callback function to handle changes to the media query
-    const handleMediaQueryChange = (event) => {
-      setIsMobile(event.matches);
+    const handleResize = () => {
+      setWindowWidth(window.innerWidth);
     };
-
-    // Add the callback function as a listener for changes to the media query
-    mediaQuery.addEventListener("change", handleMediaQueryChange);
+    window.addEventListener("resize", handleResize);
 
     // Setup intersection observer
     const observer = new IntersectionObserver(
@@ -72,13 +61,27 @@ const ComputersCanvas = () => {
 
     // Remove listeners when the component is unmounted
     return () => {
-      mediaQuery.removeEventListener("change", handleMediaQueryChange);
+      window.removeEventListener("resize", handleResize);
       if (containerRef.current) {
         observer.unobserve(containerRef.current);
       }
       document.removeEventListener("visibilitychange", handleVisibility);
     };
   }, []);
+
+  const { scale, position } = useMemo(() => {
+    if (windowWidth < 280) {
+      return { scale: 0.32, position: [0, -1.6, -2.2] };
+    } else if (windowWidth < 360) {
+      return { scale: 0.42, position: [0, -1.9, -2.2] };
+    } else if (windowWidth < 500) {
+      return { scale: 0.52, position: [0, -2.3, -2.2] };
+    } else if (windowWidth < 800) {
+      return { scale: 0.62, position: [0, -2.7, -2.2] };
+    } else {
+      return { scale: 0.75, position: [0, -3.25, -1.5] };
+    }
+  }, [windowWidth]);
 
   return (
     <div ref={containerRef} className="w-full h-full min-h-[350px] sm:min-h-[500px]">
@@ -96,7 +99,7 @@ const ComputersCanvas = () => {
               maxPolarAngle={Math.PI / 2}
               minPolarAngle={Math.PI / 2}
             />
-            <Computers isMobile={isMobile} />
+            <Computers scale={scale} position={position} />
           </Suspense>
 
           <Preload all />
