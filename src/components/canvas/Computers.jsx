@@ -4,9 +4,16 @@ import { OrbitControls, Preload, useGLTF } from "@react-three/drei";
 
 import CanvasLoader from "../Loader";
 
-const Computers = ({ scale, position, orbitControlsRef }) => {
+const Computers = ({ scale, position, target, orbitControlsRef }) => {
   const computer = useGLTF("./desktop_pc/scene.gltf");
   const { camera, raycaster, scene, gl } = useThree();
+
+  useEffect(() => {
+    if (orbitControlsRef.current) {
+      orbitControlsRef.current.target.set(target[0], target[1], target[2]);
+      orbitControlsRef.current.update();
+    }
+  }, [target, orbitControlsRef]);
 
   useEffect(() => {
     const canvasEl = gl.domElement;
@@ -163,7 +170,7 @@ const ComputersCanvas = () => {
               enabled={false}
               target={target}
             />
-            <Computers scale={scale} position={position} orbitControlsRef={orbitControlsRef} />
+            <Computers scale={scale} position={position} target={target} orbitControlsRef={orbitControlsRef} />
           </Suspense>
 
           <Preload all />
