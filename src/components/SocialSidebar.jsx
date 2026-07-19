@@ -68,7 +68,7 @@ const SocialSidebar = () => {
   return (
     <div className="relative w-full flex flex-col items-center justify-center gap-0 mt-8 pb-28 z-40 sm:fixed sm:bottom-0 sm:right-4 sm:md:right-6 sm:left-auto sm:translate-x-0 sm:top-auto sm:w-auto sm:m-0 sm:pb-0 sm:gap-4">
       {/* Social links glass container */}
-      <div className="flex flex-row gap-3 bg-[#120F17]/70 backdrop-blur-md border border-neutral-800/80 rounded-2xl py-3 px-5 shadow-2xl sm:flex-col sm:gap-3 sm:py-4 sm:px-2.5">
+      <div className="flex flex-row gap-3 bg-white/[0.02] bg-gradient-to-b from-white/[0.06] to-transparent backdrop-blur-xl border border-white/10 rounded-[24px] py-3 px-5 shadow-[0_8px_32px_0_rgba(0,0,0,0.37)] sm:flex-col sm:gap-3.5 sm:py-5 sm:px-3">
         {socialLinks.map((social, index) => (
           <motion.a
             key={index}
